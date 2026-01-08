@@ -1,0 +1,61 @@
+using UnityEngine;
+
+public class Player : MonoBehaviour
+{
+    private Rigidbody2D rb;
+    private Animator anim;
+
+    [Header("Movement Info")]
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float jumpForce;
+
+    private bool playerUnlocked;
+
+    [Header("Collision Info")]
+    [SerializeField] private float groundCheckDistance;
+    [SerializeField] private LayerMask whatIsGround;
+    private bool isGrounded;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+    }
+
+    // Update is called once per frame
+    private void Update()
+    {
+        AnimatorControllers();
+
+        if (playerUnlocked)
+            rb.linearVelocity = new Vector2(moveSpeed, rb.linearVelocity.y);
+        CheckCollision();
+        CheckInput();
+    }
+
+    private void AnimatorControllers()
+    {
+
+        anim.SetBool("isGrounded", isGrounded);
+        anim.SetFloat("xVelocity", rb.linearVelocity.x);
+        anim.SetFloat("yVelocity", rb.linearVelocity.y);
+    }
+
+    private void CheckCollision()
+    {
+        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
+    }
+
+    private void CheckInput()
+    {
+        if (Input.GetButtonDown("Fire2"))
+            playerUnlocked = true;
+
+        if (Input.GetButtonDown("Jump") && isGrounded)
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+    }
+    
+    private void OnDrawGizmos() {
+        Gizmos.DrawLine(transform.position, new Vector2(transform.position.x, transform.position.y - groundCheckDistance));
+    }
+}
